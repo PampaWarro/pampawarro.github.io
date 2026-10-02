@@ -1,0 +1,598 @@
+/* ==========================================================================
+   1. Web font
+
+   The original site rendered all text in Futura PT (ParaType), served by the
+   previous host's Adobe Fonts kit, which was licensed to that host only.
+   This site ships Jost (SIL OFL 1.1, by Owen Earl, indestructible type*;
+   Google Fonts build v3.710, latin subset, one variable file), tuned to take
+   up the same space as Futura PT.
+
+   What each descriptor does:
+     font-weight        Which Jost weight stands in for which Futura PT weight.
+                        The value is also the wght axis value the browser applies:
+                        CSS font-weight 300 selects the 265 face, 400 selects 390,
+                        700 (bold, strong) selects 700. Verified in Chromium, Firefox, WebKit.
+     size-adjust        Scales glyphs and advance widths so lines break where
+                        Futura PT broke them (as closely as a different typeface can).
+     ascent-override, descent-override, line-gap-override
+                        Futura PT's own vertical metrics, so baselines land on the
+                        same pixel. Each value is the Futura PT metric divided by
+                        size-adjust, because size-adjust also scales the overrides.
+     font-display       auto, as the original kit: text waits up to about 3s for the
+                        font, then shows in a fallback face until the font arrives.
+
+   The numbers were measured against the original; please do not round them.
+   ========================================================================== */
+
+/* stands in for Futura PT Light (300): h1, h2, "< Back", the "Crew" title */
+@font-face {
+  font-family: "Jost PW";
+  src: url("/assets/fonts/jost-latin-wght-normal.woff2") format("woff2");
+  font-weight: 265;
+  font-style: normal;
+  font-display: auto;
+  size-adjust: 91%;
+  ascent-override: 98.9011%;   /* 0.9 / 0.91 */
+  descent-override: 27.4863%;  /* 0.25 / 0.91 x 1.0005 (the nudge keeps Chromium's rounding of the descent on Futura PT's pixel) */
+  line-gap-override: 0%;
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+/* stands in for Futura PT Book (400): body copy, nav, links, footer, "Crew" subtitle */
+@font-face {
+  font-family: "Jost PW";
+  src: url("/assets/fonts/jost-latin-wght-normal.woff2") format("woff2");
+  font-weight: 390;
+  font-style: normal;
+  font-display: auto;
+  size-adjust: 91.4%;
+  ascent-override: 101.3129%;   /* 0.926 / 0.914 */
+  descent-override: 27.366%;  /* 0.25 / 0.914 x 1.0005 (same nudge) */
+  line-gap-override: 0%;
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+/* stands in for Futura PT Heavy (700): <strong> in the hover captions on / and /experiencia */
+@font-face {
+  font-family: "Jost PW";
+  src: url("/assets/fonts/jost-latin-wght-normal.woff2") format("woff2");
+  font-weight: 700;
+  font-style: normal;
+  font-display: auto;
+  size-adjust: 94.7%;
+  ascent-override: 101.2672%;   /* 0.959 / 0.947 */
+  descent-override: 27.4551%;  /* 0.26 / 0.947 */
+  line-gap-override: 0%;
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+/* "futura-pt" comes first. It resolves only when an Adobe Fonts web project <link> is
+   added to the pages (README, "Fonts"). With that link the site is pixel identical to
+   the original and nothing else changes. Without it "Jost PW" renders. The remaining
+   names are last resort fallbacks for the case where the font file cannot load. */
+:root {
+  --font-sans: "futura-pt", "Jost PW", Futura, "Century Gothic", sans-serif;
+}
+
+/* ==========================================================================
+   pampawarro.org: the stylesheet.
+
+   Section 1 (the @font-face set above) is the font. Everything below is the
+   site: colours, type sizes, shell spacing and timings are custom properties
+   declared once in the token block (the collage geometry percentages are
+   written in place), the layout has a single breakpoint (800px: 801 is
+   desktop, 800 is mobile), and the numbers that look odd carry a comment
+   saying where they come from.
+   ========================================================================== */
+
+/* ---------- 2. tokens ---------- */
+:root {
+  /* colour */
+  --c-bg: #fff;
+  --c-text: #111;
+  --c-heading: #9c9c9c;                   /* h1, h2, "< Back" */
+  --c-link: #000;
+  --c-link-hover: rgba(69, 69, 69, .71);
+  --c-nav: #999;
+  --c-nav-active: #000;
+  --c-nav-hover: #666;
+  --c-menu-bar: #f7f7f7;
+  --c-menu-label: #111;
+  --c-social: #919191;
+  --c-social-dim: rgba(145, 145, 145, .4);
+  --c-caption-bg: rgba(0, 0, 0, .3);
+  --c-caption: #bbb;
+  --c-caption-strong: #eee;
+  --c-card: #000;                          /* the "Crew" card on /ethos */
+  --c-card-text: #fff;
+
+  /* type (em values on purpose: descendants inherit the resolved px length,
+     so the 14px MENU label keeps the 27.2px body line box and the social icons
+     keep the 0.17px letter-spacing that sets their pitch) */
+  --fs-body: 17px;
+  --lh-body: 1.6em;                        /* 27.2px */
+  --ls-body: .01em;                        /* 0.17px */
+  --fs-h1: 24px;
+  --fs-h2: 19.2px;
+  --lh-heading: 1.4em;
+  --ls-heading: .04em;
+  --fs-nav: 15px;
+  --lh-nav: 30px;
+  --ls-nav: .04em;
+  --fs-menu-label: 14px;
+  --fs-menu-item: 16px;
+  --lh-menu-item: 1.2em;
+  --fs-caption: 12px;
+  --lh-caption: 1.68em;
+
+  /* shell geometry */
+  --canvas-pad-x: 40px;
+  --shell-pad-y: 40px;
+  --shell-pad-x: 20px;
+  --shell-max: 1800px;                     /* content-box max-width of header and footer (1840 outer) */
+  --logo-h: 36px;
+  --nav-gap: 25px;
+  --nav-pad-y: 3px;
+  --nav-inset-right: 40px;
+  --nav-drop: 1px;
+  --menu-bar-pad: 15px;
+  --menu-pad-y: 1.5em;                     /* 25.5px */
+  --menu-item-pad: .7em;                   /* 11.2px */
+  --menu-open-max: 999px;                  /* "open" is max-height 999px, as on the original: the 0.3s
+                                              ease runs over 999px, so the visible 134px open in ~45ms */
+  --menu-speed: .3s;
+  --social-size: 20px;
+  --social-gap: 5.9px;
+  --social-speed: 170ms;
+  --footer-text-outset: 17px;
+  --footer-text-pad: 5px;
+
+  /* page frame and 12-column grid: page padding 30px (20px on mobile), content capped at
+     1770px, rows bleed 17px on each side, every block has 17px x 5px padding, so neighbouring
+     blocks are 34px apart vertically and 10px apart horizontally */
+  --page-pad-x: 30px;
+  --page-pad-x-mobile: 20px;
+  --page-pad-y-mobile: 30px;
+  --page-max: 1770px;
+  --row-outset: 17px;
+  --block-pad-y: 17px;
+  --block-pad-x: 5px;
+
+  /* home tile caption (shown on hover) */
+  --caption-pad: 20px;
+  --caption-text-top: 15.3px;              /* 1em of .9 x 17px */
+  --caption-text-bottom: 12px;             /* hover */
+  --caption-text-bottom-rest: 7px;
+  --caption-max-h: 75%;
+  --caption-speed: .1s;
+
+  /* home video block */
+  --video-ratio: 56.25%;
+  --video-thumb-h: 117.3333%;              /* 0.66 / 0.5625: the original lays the thumbnail out at 100:66 */
+  --video-thumb-top: -8.6667%;             /* (1 - 0.66 / 0.5625) / 2 */
+  --video-fade: 1s;
+  --play-box: 48px;
+  --play-icon: 44px;
+  --play-icon-hidpi: 33px;                 /* the @2x artwork is drawn smaller on hi-dpi screens */
+
+  /* gallery strip */
+  --strip-ratio: 50%;                      /* the strip is twice as wide as it is tall */
+
+  /* /ethos cover and collage */
+  --cover-ratio: 66.6015625%;              /* 1364 / 2048 */
+  --collage-fade: 1s;
+  --collage-delay: 1s;
+  --collage-k-title: .12;                  /* title font-size = 0.12 x card content width ... */
+  --collage-k-subtitle: .044;              /* ... subtitle 0.044 x, both quantised, see .collage__title */
+  --collage-min-font: 13px;
+}
+
+/* ---------- 3. base ---------- */
+html { height: 100%; }
+
+body {
+  margin: 0;
+  min-height: 100%;
+  display: flex;                           /* a page shorter than the viewport is centred vertically */
+  flex-flow: row wrap;
+  align-items: center;
+  justify-content: center;
+  background: var(--c-bg);
+  color: var(--c-text);
+  font-family: var(--font-sans);
+  font-size: var(--fs-body);
+  line-height: var(--lh-body);
+  letter-spacing: var(--ls-body);
+}
+
+a, a:visited { color: var(--c-link); text-decoration: none; }
+a:hover { color: var(--c-link-hover); }
+a:focus { outline: thin dotted; }
+a:hover, a:active { outline: 0; }
+
+h1, h2 {
+  margin: 1em 0;
+  font-weight: 300;
+  line-height: var(--lh-heading);
+  letter-spacing: var(--ls-heading);
+  color: var(--c-heading);
+}
+h1 { font-size: var(--fs-h1); }
+h2 { font-size: var(--fs-h2); }
+p { margin: 0 0 1em; }
+img { vertical-align: middle; }
+figure { margin: 0; }
+
+/* ---------- 4. shell: canvas, header, nav, mobile menu, footer ---------- */
+/* content-box on purpose (no border-box): at very narrow widths, such as a phone at 200-300% zoom,
+   the canvas stops at its min-content width and overflows on both sides, as the original did */
+.canvas {
+  position: relative;
+  width: 100%;
+  padding: 0 var(--canvas-pad-x);
+}
+/* The original template's clearfix: a hidden "." in a zero-height block. Its 27.2px line box
+   overflows the bottom of the canvas, so every document is 27.2px taller than the footer. */
+.canvas::after,
+.site-header::after,
+.site-footer::after {
+  content: ".";
+  display: block;
+  height: 0;
+  clear: both;
+  visibility: hidden;
+}
+
+.site-header,
+.site-footer {
+  position: relative;
+  max-width: var(--shell-max);
+  margin: 0 auto;
+  padding: var(--shell-pad-y) var(--shell-pad-x);
+}
+
+.logo {
+  float: left;
+  margin: 0;
+  height: var(--logo-h);
+  line-height: 1em;
+}
+/* an inline link around an inline image (vertical-align: middle from the base rule), as on the
+   original: the 36px image is the whole line box, and the keyboard focus ring, the only visible
+   trace of the link, is drawn in the heading grey around the 24px text box */
+.logo a { color: var(--c-heading); }
+.logo a:hover { color: var(--c-link-hover); }
+.logo img { width: auto; height: auto; max-width: 100%; max-height: 100%; }   /* 36px high, narrower only when it must be */
+
+.site-nav {
+  position: absolute;
+  top: calc(var(--shell-pad-y) + var(--nav-drop));
+  right: var(--nav-inset-right);
+  font-size: var(--fs-nav);
+  letter-spacing: var(--ls-nav);
+}
+.site-nav ul { display: flex; gap: var(--nav-gap); margin: 0; padding: 0; list-style: none; }
+.site-nav a { display: block; padding: var(--nav-pad-y) 0; line-height: var(--lh-nav); color: var(--c-nav); }
+.site-nav a.is-active { color: var(--c-nav-active); }
+.site-nav a:hover { color: var(--c-nav-hover); }
+
+/* the collapsed menu panel and the MENU bar only exist at 800px and below */
+.mobile-menu { display: none; }
+.menu-bar { display: none; }
+
+.back-to-top { display: none; margin: 0; text-align: center; }
+.footer-text { float: right; width: 50%; }
+.footer-text__inner { position: relative; margin: 0 calc(-1 * var(--footer-text-outset)); padding: 0 var(--footer-text-pad); }
+.footer-text p { margin: 0; text-align: right; overflow-wrap: break-word; }   /* the address breaks only on a very narrow screen */
+
+.social { float: left; width: 50%; font-size: 0; line-height: 0; text-align: left; }
+.social__link {
+  display: inline-block;
+  position: relative;
+  overflow: hidden;
+  width: var(--social-size);
+  height: var(--social-size);
+  margin: 0 var(--social-gap);
+}
+.social__link:first-of-type { margin-left: 0; }
+.social__link:last-of-type { margin-right: 0; }
+.social__link svg { position: absolute; top: 0; left: 0; width: 100%; height: 100%; }
+.social__link path { fill: var(--c-social); transition: fill var(--social-speed) ease-in-out; }
+.social:hover .social__link path { fill: var(--c-social-dim); }
+.social:hover .social__link:hover path { fill: var(--c-social); }
+
+/* ---------- 5. page frame, grid, text blocks ---------- */
+.page { padding: 0 var(--page-pad-x); }
+.page__inner { max-width: var(--page-max); margin: 0 auto; }
+
+.row { display: flex; align-items: flex-start; margin: 0 calc(-1 * var(--row-outset)); }
+.col { flex: 0 0 auto; box-sizing: border-box; min-width: 0; }
+/* twelfths of the row, rounded to 4 decimals like the original (a 1fr grid is 1px off at 1024) */
+.col--1 { width: 8.3333%; }
+.col--2 { width: 16.6667%; }
+.col--3 { width: 25%; }
+.col--4 { width: 33.3333%; }
+.col--5 { width: 41.6667%; }
+.col--6 { width: 50%; }
+.col--7 { width: 58.3333%; }
+.col--8 { width: 66.6667%; }
+.col--10 { width: 83.3333%; }
+.col--11 { width: 91.6667%; }
+.col--12 { width: 100%; }
+.col--offset-2 { margin-left: 16.6667%; }
+
+.block { padding: var(--block-pad-y) var(--block-pad-x); }
+.block--flush-top { padding-top: 0; }    /* the first block of a page sits right under the header */
+.block--flush { padding-top: 0; padding-bottom: 0; }   /* gallery title row */
+
+/* text-block content: no margin above the first and below the last element */
+.prose > :first-child { margin-top: 0; }
+.prose > :last-child { margin-bottom: 0; }
+.prose p { overflow-wrap: break-word; }
+.text-center { text-align: center; }
+.text-right { text-align: right; }
+.underline { text-decoration: underline; }
+/* the original editor stored these elements with white-space: pre-wrap; it only shows as the
+   hanging space of the two-line "< Back" link between 801 and 885px */
+.pre-wrap { white-space: pre-wrap; }
+
+/* ---------- 6. home: image tiles and the video ---------- */
+/* visible aspect ratio (height / width) and natural-width cap of each tile */
+.tile--fuego-austral-2019 { --tile-ratio: 50.61538314819336%; --tile-max: 2500px; }
+.tile--conjuro { --tile-ratio: 80.8681640625%; --tile-max: 2449px; }
+.tile--fuego-austral-2018 { --tile-ratio: 56.90045166015625%; --tile-max: 2500px; }
+.tile--primavera-pampa-warro-el-correo { --tile-ratio: 66.208251953125%; --tile-max: 2048px; }
+.tile--pwi { --tile-ratio: 93.89067840576172%; --tile-max: 806px; }
+.tile--fuego-austral-2017 { --tile-ratio: 91.48418426513672%; --tile-max: 640px; }
+.tile--recompression-2017 { --tile-ratio: 44.09356689453125%; --tile-max: 2043px; }
+
+.tile__figure { position: relative; max-width: var(--tile-max); margin: 0 auto; }
+.tile__link { display: block; }
+.tile__crop { display: block; position: relative; overflow: hidden; padding-bottom: var(--tile-ratio); line-height: 0; }
+.tile__crop img {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: 50% 50%;
+}
+.tile__caption {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  box-sizing: border-box;
+  max-height: 100%;
+  padding: var(--caption-pad);
+  overflow-y: auto;
+  background: var(--c-caption-bg);
+  text-align: center;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity var(--caption-speed) ease-out;
+}
+.tile__caption-text {
+  display: block;
+  margin: var(--caption-text-top) 0 var(--caption-text-bottom-rest);
+  font-size: var(--fs-caption);
+  line-height: var(--lh-caption);
+  letter-spacing: var(--ls-body);
+  color: var(--c-caption);
+  transition: margin-bottom var(--caption-speed) ease-out;
+}
+.tile__caption-text strong { font-weight: 700; color: var(--c-caption-strong); }
+.tile:hover .tile__caption { max-height: var(--caption-max-h); opacity: 1; visibility: visible; }
+.tile:hover .tile__caption-text { margin-bottom: var(--caption-text-bottom); }
+
+.video { position: relative; height: 0; padding-bottom: var(--video-ratio); }
+.video__overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  transition: opacity var(--video-fade) ease, visibility 0s linear var(--video-fade);
+  animation: video-in var(--video-fade) ease;   /* the thumbnail fades in on load, as on the original */
+}
+@keyframes video-in { from { opacity: 0; } }
+.video__thumb {
+  position: absolute;
+  top: var(--video-thumb-top);             /* < 0.25px off; the exact value follows */
+  left: 0;
+  width: 100%;
+  height: var(--video-thumb-h);
+}
+/* exact: the original centres the 100:66 thumbnail against the ROUNDED box height */
+@supports (top: round(nearest, 1px, 1px)) {
+  .video__thumb { top: calc((round(nearest, 100%, 1px) - var(--video-thumb-h)) / 2); }
+}
+.video__play {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: var(--play-box);
+  height: var(--play-box);
+  margin: calc(var(--play-box) / -2) 0 0 calc(var(--play-box) / -2);
+  padding: 0;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+}
+.video__play svg {
+  display: block;
+  width: var(--play-icon);
+  height: var(--play-icon);
+  margin: calc((var(--play-box) - var(--play-icon)) / 2);
+}
+.video iframe { position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: 0; }
+.video.is-playing .video__overlay { opacity: 0; visibility: hidden; }
+
+/* ---------- 7. /ethos: cover photo, "Crew" collage, name columns ---------- */
+.cover { position: relative; padding-bottom: var(--cover-ratio); overflow: hidden; }
+.cover img { position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; object-position: 50% 50%; }
+
+/* name columns: [1/8 gap][2/8][2/8][2/8][1/8 gap] of the content column, no row bleed */
+.crew { display: flex; align-items: flex-start; }
+.crew__col { flex: 0 0 auto; box-sizing: border-box; width: 25%; }
+.crew__col:first-child { margin-left: 12.5%; }
+
+/* collage: photo on the left, black card overlapping it from the right; the whole figure
+   fades in over 1s after a 1s delay, as on the original */
+.collage-box { container: collage / inline-size; }
+.collage { position: relative; display: flex; animation: collage-in var(--collage-fade) ease-out var(--collage-delay) both; }
+@keyframes collage-in { from { opacity: 0; } to { opacity: 1; } }
+.collage__media { width: 50%; }
+.collage__media img { display: block; width: 140%; height: auto; object-fit: contain; }   /* 140% of half = 70% of the block; contain is the original's value (the box has the photo's own ratio, so it shows nothing) */
+.collage__caption { width: 50%; z-index: 2; display: flex; align-items: flex-start; justify-content: flex-start; pointer-events: none; }
+.collage__card {
+  container-type: inline-size;
+  box-sizing: border-box;
+  width: 90%;
+  margin: 10% 0 0 10%;
+  padding: 10%;
+  background-color: var(--c-card);
+  text-align: left;
+  pointer-events: auto;
+}
+.collage__title, .collage__subtitle { color: var(--c-card-text); letter-spacing: var(--ls-body); white-space: pre-wrap; overflow-wrap: break-word; }
+.collage__title { --collage-k: var(--collage-k-title); margin: 0; font-weight: 300; line-height: 1.2em; }
+.collage__subtitle { --collage-k: var(--collage-k-subtitle); margin: 4% 0 0; line-height: 1.5em; }
+
+/* Approximate sizes (0.12 x card content width, without the rounding). Only ever visible in a
+   browser that has neither round()/cq units nor JavaScript. Desktop here, stacked layout below. */
+.collage__title { font-size: min(calc(2.8vw - 3.39px), 50.09px); }
+.collage__subtitle { font-size: var(--collage-min-font); }
+
+/* Exact sizes, pure CSS (the script in site.js only takes over where round()/cqw are missing):
+     m = card content width rounded to the integer pixel (what offsetWidth returns)
+     F = k x (m rounded DOWN to a multiple of 0.1vw)      k = 0.12 title, 0.044 subtitle
+     F below 14px snaps to 13px; never below 0.75rem.
+   The two tiny epsilons keep float noise from flipping x.5 and exact-multiple cases. */
+@supports (font-size: round(down, 1cqw, 1px)) {
+  html:not([data-collage="js"]) .collage__title,
+  html:not([data-collage="js"]) .collage__subtitle {
+    --collage-m: round(down, calc(round(nearest, calc(100cqw + 0.001px), 1px) + 0.0005px), 0.1vw);
+    --collage-f: max(0.75rem, calc(var(--collage-k) * var(--collage-m)));
+    font-size: max(var(--collage-min-font), min(var(--collage-f), calc((var(--collage-f) - 14px) * 100000 + 14px)));
+  }
+}
+/* stacked variant when the block is narrower than 414.5px (the original tested offsetWidth < 415;
+   a container query cannot read a custom property, hence the literal) */
+@container collage (width < 414.5px) {
+  html:not([data-collage="js"]) .collage { display: block; }
+  html:not([data-collage="js"]) .collage::after { content: " "; display: block; clear: both; }
+  html:not([data-collage="js"]) .collage__media { width: 90%; }
+  html:not([data-collage="js"]) .collage__media img { width: 100%; }
+  html:not([data-collage="js"]) .collage__caption { display: block; float: right; width: 90%; margin-top: -20%; position: relative; }
+  html:not([data-collage="js"]) .collage__card { width: auto; margin: 0; }
+  .collage .collage__title { font-size: calc(8.64vw - 8.29px); }   /* approximate, see above; the exact rule outranks it */
+}
+/* the same stacked rules behind a class, for the script fallback (font sizes written by the script) */
+.collage.is-stacked { display: block; }
+.collage.is-stacked::after { content: " "; display: block; clear: both; }
+.collage.is-stacked .collage__media { width: 90%; }
+.collage.is-stacked .collage__media img { width: 100%; }
+.collage.is-stacked .collage__caption { display: block; float: right; width: 90%; margin-top: -20%; position: relative; }
+.collage.is-stacked .collage__card { width: auto; margin: 0; }
+
+/* ---------- 8. gallery pages: title row, strip slider, SoundCloud players ---------- */
+.back a, .back a:visited { color: var(--c-heading); }
+.back a:hover { color: var(--c-link-hover); }
+
+/* The strip: a 2:1 clipping box. Slides are the images themselves, strip height, natural width,
+   side by side with no gap; site.js shifts the track with `left`. `clip` rather than `hidden`:
+   nothing (a swipe before the script runs, a screen reader's scroll-into-view) can scroll the box
+   behind the script's back. Without JavaScript the strip scrolls natively, so every slide shows. */
+.strip { position: relative; height: 0; padding-bottom: var(--strip-ratio); overflow: hidden; overflow: clip; }
+@media (scripting: none) { .strip { overflow-x: auto; overflow-y: hidden; } }
+.strip__track { position: absolute; top: 0; left: 0; height: 100%; display: flex; }
+.strip__slide { flex: none; height: 100%; width: auto; cursor: pointer; }
+
+/* a player box is as tall as its width x --ratio (set per player in the HTML) */
+.player { position: relative; height: 0; padding-bottom: var(--ratio); }
+.player iframe { position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: 0; }
+
+/* ---------- 9. hi-dpi screens ---------- */
+@media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 1.5dppx) {
+  /* the original swaps to a @2x bitmap drawn at 33px: the icon is SMALLER on hi-dpi screens */
+  .video__play svg {
+    width: var(--play-icon-hidpi);
+    height: var(--play-icon-hidpi);
+    margin: calc((var(--play-box) - var(--play-icon-hidpi)) / 2);
+  }
+}
+
+/* ---------- 10. the only layout breakpoint ---------- */
+@media only screen and (max-width: 800px) {
+  .mobile-menu {
+    display: block;
+    max-height: 0;
+    overflow: hidden;
+    visibility: hidden;        /* keeps the collapsed links out of the tab order */
+    transition: max-height var(--menu-speed) ease, visibility 0s linear var(--menu-speed);
+  }
+  .mobile-menu.is-open {
+    max-height: var(--menu-open-max);
+    visibility: visible;
+    transition: max-height var(--menu-speed) ease, visibility 0s;
+  }
+  .mobile-menu__inner { padding: var(--menu-pad-y) 0; }
+  .mobile-menu ul { margin: 0; padding: 0; list-style: none; }
+  .mobile-menu a {
+    display: block;
+    padding: var(--menu-item-pad);
+    font-size: var(--fs-menu-item);
+    line-height: var(--lh-menu-item);
+    letter-spacing: var(--ls-nav);
+    text-align: center;
+    color: var(--c-nav);
+  }
+  .mobile-menu a.is-active { color: var(--c-nav-active); }
+  .mobile-menu a:hover { color: var(--c-nav-hover); }
+
+  .menu-bar {
+    display: block;
+    padding: var(--menu-bar-pad);
+    background: var(--c-menu-bar);
+    letter-spacing: var(--ls-nav);   /* .04em of 17px = 0.68px, inherited by the 14px label */
+    text-align: center;
+  }
+  .menu-bar__toggle {
+    display: block;
+    width: 100%;
+    margin: 0;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    font: inherit;
+    font-size: var(--fs-menu-label);
+    line-height: inherit;
+    letter-spacing: inherit;
+    text-transform: uppercase;
+    color: var(--c-menu-label);
+    cursor: pointer;
+  }
+
+  .site-nav { display: none; }
+  .logo { float: none; text-align: center; }
+
+  .page { padding: var(--page-pad-y-mobile) var(--page-pad-x-mobile); }
+  .row { display: block; }
+  .col { width: auto; margin-left: 0; }
+  .block--flush-top { padding-top: var(--block-pad-y); }
+  .block--flush { padding-top: var(--block-pad-y); padding-bottom: var(--block-pad-y); }
+
+  .crew { display: block; }
+  .crew__col { width: auto; }
+  .crew__col:first-child { margin-left: 0; }
+  .collage__title { font-size: calc(4.2vw - 4.03px); }   /* approximate, see section 7 */
+
+  .back-to-top { display: block; }
+  .footer-text { float: none; width: auto; }
+  .footer-text__inner { padding: var(--block-pad-y) var(--footer-text-pad); }
+  .footer-text p { text-align: center; }
+  .social { float: none; width: auto; text-align: center; }
+}
