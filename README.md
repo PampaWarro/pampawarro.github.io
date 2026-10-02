@@ -31,6 +31,7 @@ assets/img/ethos/                       the ethos photos
 assets/img/<gallery-slug>/              the slides of each gallery page, e.g. assets/img/pwi/01-1000w.webp
 favicon.ico  robots.txt  sitemap.xml    crawl files
 .nojekyll                               tells GitHub Pages to serve the files as they are
+CNAME                                   the domain GitHub Pages serves the site on (pampawarro.org)
 ```
 
 URLs have no extension: `/ethos` is served from `ethos.html` by GitHub Pages. Every link and
